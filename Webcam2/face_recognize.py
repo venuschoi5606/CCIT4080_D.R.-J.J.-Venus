@@ -1,6 +1,7 @@
 # facerec.py
 import cv2, sys, numpy, os
 from pyfirmata import Arduino
+import time
 
 # Reference: https://github.com/vschs007/flask-realtime-face-detection-opencv-python
 
@@ -19,9 +20,6 @@ ledB.write(val_1)
 ledG.write(val_2)
 ledY.write(val_3)
 ledR.write(val_4)
-
-ledR.write(True)
-print("Door Closed")
 ################ Arduinio ##############
 
 size = 4
@@ -56,42 +54,45 @@ face_cascade = cv2.CascadeClassifier(haar_file)
 # IMPORANT: maybe need to change from 0 to 1 for USB Camera
 webcam = cv2.VideoCapture(0)
 
-positive_count = 0;
-
 while True:
-    (_, im) = webcam.read()
-    gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-    for (x,y,w,h) in faces:
-        cv2.rectangle(im,(x,y),(x+w,y+h),(255,0,0),2)
-        face = gray[y:y + h, x:x + w]
-        face_resize = cv2.resize(face, (width, height))
-        # Try to recognize the face
-        prediction = model.predict(face_resize)
+    ledG.write(False)
+    ledR.write(True)
+    print("Door Closed")
+    positive_count = 0
+    while True:
+        (_, im) = webcam.read()
+        gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+        for (x,y,w,h) in faces:
+            cv2.rectangle(im,(x,y),(x+w,y+h),(255,0,0),2)
+            face = gray[y:y + h, x:x + w]
+            face_resize = cv2.resize(face, (width, height))
+            # Try to recognize the face
+            prediction = model.predict(face_resize)
 
+            if prediction[1]<80: # threshold, the lager the prediction value, the less similar the figure
+                cv2.putText(im,'%s - %.0f' % (names[prediction[0]],prediction[1]),(x-10, y-10), cv2.FONT_HERSHEY_PLAIN,1,(0, 255, 0))
+                cv2.rectangle(im, (x, y), (x + w, y + h), (0, 255, 0), 3)
+                positive_count+=1;
+                print(positive_count)
+            else:
+                cv2.putText(im,'not recognized %.0f' % (prediction[1]) ,(x-10, y-10), cv2.FONT_HERSHEY_PLAIN,1,(0, 0, 255))
+                cv2.rectangle(im, (x, y), (x + w, y + h), (0, 0, 255), 3)
+                positive_count=0;
+                print(positive_count)
 
-        if prediction[1]<80: # threshold, the lager the prediction value, the less similar the figure
-            cv2.putText(im,'%s - %.0f' % (names[prediction[0]],prediction[1]),(x-10, y-10), cv2.FONT_HERSHEY_PLAIN,1,(0, 255, 0))
-            cv2.rectangle(im, (x, y), (x + w, y + h), (0, 255, 0), 3)
-            positive_count+=1;
-            print(positive_count)
-        else:
-            cv2.putText(im,'not recognized %.0f' % (prediction[1]) ,(x-10, y-10), cv2.FONT_HERSHEY_PLAIN,1,(0, 0, 255))
-            cv2.rectangle(im, (x, y), (x + w, y + h), (0, 0, 255), 3)
-            positive_count=0;
-            print(positive_count)
+        cv2.imshow('OpenCV', im)
 
-    cv2.imshow('OpenCV', im)
+        if positive_count > 5:
+            ledG.write(True)
+            ledR.write(False)
+            print("Door Open")
+            time.sleep(5)
+            break
 
-    if positive_count > 5:
-        ledG.write(True)
-        ledR.write(False)
-        print("Door Open")
-        break
-
-    # press 'esc' to escape
-    key = cv2.waitKey(1000)
+        # press 'esc' to escape
+        key = cv2.waitKey(1000)
+        if key == 27:
+             break
     if key == 27:
-         break
-
-
+        break
