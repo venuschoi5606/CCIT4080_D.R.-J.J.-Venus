@@ -11,6 +11,7 @@ const char *voiceBuffer[] =
 {
     "Turn on the light",
     "Turn off the light",
+
     "Play music",
     "Pause",
     "Next",
@@ -25,6 +26,7 @@ const char *voiceBuffer[] =
     "Open the door",
     "Close the door",
     "Left",
+
     "Right",
     "Stop",
     "Start",

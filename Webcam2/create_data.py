@@ -18,7 +18,7 @@ webcam = cv2.VideoCapture(0) #'0' is use for my webcam, if you've any other came
 
 # The program loops until it has 30 images of the face.
 count = 1
-while count < 30: 
+while count < 100:
     (_, im) = webcam.read()
     gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, 1.3, 4)
@@ -32,6 +32,6 @@ while count < 30:
 
     # press 'esc' to interrupt
     cv2.imshow('OpenCV', im)
-    key = cv2.waitKey(500)
+    key = cv2.waitKey(100)
     if key == 27:
         break

@@ -1,7 +1,28 @@
 # facerec.py
 import cv2, sys, numpy, os
+from pyfirmata import Arduino
 
 # Reference: https://github.com/vschs007/flask-realtime-face-detection-opencv-python
+
+################ Arduinio ##############
+board = Arduino('COM6')
+
+# initializing the LEDs
+ledB = board.get_pin('d:13:o') #B
+ledG = board.get_pin('d:12:o') #G
+ledY = board.get_pin('d:11:o') #Y
+ledR = board.get_pin('d:10:o') #R
+wait = 1
+
+val_1 = val_2 = val_3 = val_4 = False
+ledB.write(val_1)
+ledG.write(val_2)
+ledY.write(val_3)
+ledR.write(val_4)
+
+ledR.write(True)
+print("Door Closed")
+################ Arduinio ##############
 
 size = 4
 haar_file = 'haarcascade_frontalface_default.xml'
@@ -32,7 +53,11 @@ model.train(images, lables)
 
 # Part 2: Use fisherRecognizer on camera stream
 face_cascade = cv2.CascadeClassifier(haar_file)
+# IMPORANT: maybe need to change from 0 to 1 for USB Camera
 webcam = cv2.VideoCapture(0)
+
+positive_count = 0;
+
 while True:
     (_, im) = webcam.read()
     gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
@@ -45,14 +70,24 @@ while True:
         prediction = model.predict(face_resize)
 
 
-        if prediction[1]<65: # threshold, the lager the prediction value, the less similar the figure
+        if prediction[1]<80: # threshold, the lager the prediction value, the less similar the figure
             cv2.putText(im,'%s - %.0f' % (names[prediction[0]],prediction[1]),(x-10, y-10), cv2.FONT_HERSHEY_PLAIN,1,(0, 255, 0))
             cv2.rectangle(im, (x, y), (x + w, y + h), (0, 255, 0), 3)
+            positive_count+=1;
+            print(positive_count)
         else:
             cv2.putText(im,'not recognized %.0f' % (prediction[1]) ,(x-10, y-10), cv2.FONT_HERSHEY_PLAIN,1,(0, 0, 255))
             cv2.rectangle(im, (x, y), (x + w, y + h), (0, 0, 255), 3)
+            positive_count=0;
+            print(positive_count)
 
     cv2.imshow('OpenCV', im)
+
+    if positive_count > 5:
+        ledG.write(True)
+        ledR.write(False)
+        print("Door Open")
+        break
 
     # press 'esc' to escape
     key = cv2.waitKey(1000)
