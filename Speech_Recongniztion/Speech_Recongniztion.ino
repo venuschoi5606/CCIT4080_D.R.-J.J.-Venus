@@ -1,15 +1,19 @@
 #include <SoftwareSerial.h>
+#include <Servo.h>
 
 #define SOFTSERIAL_RX_PIN  2
 #define SOFTSERIAL_TX_PIN  3
 
 SoftwareSerial softSerial(SOFTSERIAL_RX_PIN,SOFTSERIAL_TX_PIN);
 
-int led = 13;
-
+int ledG = 13;
+int ledY = 12; 
+int pinM = 11;
 int inPin = 7;
 
-int val = 0;      // variable to store the read value
+Servo myservo;
+
+int val = LOW;      // variable to store the read value
 
 const char *voiceBuffer[] =
 {
@@ -44,33 +48,37 @@ void setup()
     Serial.begin(9600);
     softSerial.begin(9600);
     softSerial.listen();
-    pinMode(led,OUTPUT);
-    digitalWrite(led,LOW);
+    pinMode(ledG,OUTPUT);
+    pinMode(ledY,OUTPUT);
     pinMode(inPin,INPUT);
+    myservo.attach(11);
+    digitalWrite(ledG,LOW);
+    digitalWrite(ledY,LOW);
+    myservo.write(0);
 }
 
 void loop()
 {
-    Serial.println("dealying");
     char cmd;
     val = digitalRead(inPin);
     while(val==LOW){
+      digitalWrite(ledY,LOW);
       delay(500);
+      val = digitalRead(inPin);
     }
-     Serial.println("waitng");
+    digitalWrite(ledY,HIGH);
     if(softSerial.available())
     {
         cmd = softSerial.read();
         Serial.println(voiceBuffer[cmd - 1]);
     
-        if ((voiceBuffer[cmd - 1]) == "Turn on the light"){
-          digitalWrite(led,HIGH);
+        if ((voiceBuffer[cmd - 1]) == "Open the door"){
+          digitalWrite(ledG,HIGH);
+          myservo.write(180);
           delay(3000);
-          digitalWrite(led,LOW);
+          myservo.write(0);
+          digitalWrite(ledG,LOW);
         }
-        // else if ((voiceBuffer[cmd - 1]) == "Turn off the light"){
-        //   digitalWrite(led,LOW);
-        // }
     }
 }
 
