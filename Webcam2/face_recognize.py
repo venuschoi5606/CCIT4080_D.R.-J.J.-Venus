@@ -5,7 +5,8 @@ import time
 
 # Reference: https://github.com/vschs007/flask-realtime-face-detection-opencv-python
 
-################ Arduinio ##############
+################ Arduino ##############
+# Edit COM number when connected to Arduino
 board = Arduino('COM6')
 
 # initializing the LEDs
@@ -20,7 +21,7 @@ ledB.write(val_1)
 ledG.write(val_2)
 ledY.write(val_3)
 ledR.write(val_4)
-################ Arduinio ##############
+################ Arduino ##############
 
 size = 4
 haar_file = 'haarcascade_frontalface_default.xml'
@@ -52,7 +53,7 @@ model.train(images, lables)
 # Part 2: Use fisherRecognizer on camera stream
 face_cascade = cv2.CascadeClassifier(haar_file)
 # IMPORANT: maybe need to change from 0 to 1 for USB Camera
-webcam = cv2.VideoCapture(0)
+webcam = cv2.VideoCapture(1)
 
 while True:
     ledG.write(False)

@@ -230,7 +230,6 @@ void outputPort(byte portNumber, byte portValue, byte forceSend)
     previousPINs[portNumber] = portValue;
   }
 }
-
 /* -----------------------------------------------------------------------------
  * check all the active digital inputs for change of state, then add any events
  * to the Serial output queue using Serial.print() */

@@ -7,6 +7,10 @@ SoftwareSerial softSerial(SOFTSERIAL_RX_PIN,SOFTSERIAL_TX_PIN);
 
 int led = 13;
 
+int inPin = 7;
+
+int val = 0;      // variable to store the read value
+
 const char *voiceBuffer[] =
 {
     "Turn on the light",
@@ -42,12 +46,18 @@ void setup()
     softSerial.listen();
     pinMode(led,OUTPUT);
     digitalWrite(led,LOW);
+    pinMode(inPin,INPUT);
 }
 
 void loop()
 {
+    Serial.println("dealying");
     char cmd;
-
+    val = digitalRead(inPin);
+    while(val==LOW){
+      delay(500);
+    }
+     Serial.println("waitng");
     if(softSerial.available())
     {
         cmd = softSerial.read();
@@ -55,10 +65,12 @@ void loop()
     
         if ((voiceBuffer[cmd - 1]) == "Turn on the light"){
           digitalWrite(led,HIGH);
-        }
-        else if ((voiceBuffer[cmd - 1]) == "Turn off the light"){
+          delay(3000);
           digitalWrite(led,LOW);
         }
+        // else if ((voiceBuffer[cmd - 1]) == "Turn off the light"){
+        //   digitalWrite(led,LOW);
+        // }
     }
 }
 
