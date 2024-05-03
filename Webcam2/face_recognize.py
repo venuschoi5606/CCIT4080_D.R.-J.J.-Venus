@@ -88,7 +88,7 @@ while True:
             ledG.write(True)
             ledR.write(False)
             print("Door Open")
-            time.sleep(20)
+            time.sleep(10)
             break
 
         # press 'esc' to escape
